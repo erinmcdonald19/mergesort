@@ -10,24 +10,23 @@
 #include <sys/time.h>
 #include <stdbool.h>
 #include <pthread.h>
-//#include <mergesortparallel.h>
+#include "mergesortparallel.h"
+#include "mergesortparallel.c"
 
 #include <unistd.h> // For sysconf
 
 /* Function declarations */
 void usage(char* prog_name);
-void mergeSortSerial(int tmp[], int l, int r);
-void merge(int tmp[], int l, int m, int r);
+void mergeSortSerial(int l, int r);
+void merge(int l, int m, int r);
 
 /* Global constants */
 const int MAX_THREADS = 64;
 const int MAX_NAME_LEN = 10;
 
-int * SArray;
-int * temporary;
 /*--------------------------------------------------------------------*/
 int main(int argc, char* argv[]) {
-    /*
+    
     // Get number of threads from command line
     if (argc != 3)
         usage(argv[0]);
@@ -38,25 +37,28 @@ int main(int argc, char* argv[]) {
     if(arraySize <= 0)
         usage(argv[0]);
 
-    // For timing
-    struct timeval  tv1, tv2;
-
-    int val;
+    // allocate space for arrays
+    SArray = malloc(sizeof(int)*arraySize);
+    PArray = malloc(sizeof(int)*arraySize);
+    tmp = malloc(sizeof(int)*arraySize);
+    int val,i;
     // Fill array with random numbers
-    srandom((unsigned int) time(NULL));
-    for (long i = 0; i < arraySize; i++) {
+    for(i = 0; i < arraySize; i++){
         val = rand();
         SArray[i] = val;
-        PArray[i] = val;
+	PArray[i] = val;
     }
-    
+
+    // For timing
+   struct timeval  tv1, tv2;
+  
     // Compute sum with serial code
     gettimeofday(&tv1, NULL); // start timing
-    SArray = mergeSortSerial(VECTOR_LEN, vec); //TODO: change params
+    mergeSortSerial(0, arraySize-1);
     gettimeofday(&tv2, NULL); // stop timing
     double serialTime = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
     (double) (tv2.tv_sec - tv1.tv_sec);
-    
+ 
     // Compute sum with parallel threads
     long thread;  // Use long in case of a 64-bit system
     gettimeofday(&tv1, NULL);
@@ -79,7 +81,7 @@ int main(int argc, char* argv[]) {
         pthread_create(&thread_handles[thread], NULL,
                        mergeSortParallel, (void*) thread);
     }
-    mergeSortParallel(0); //TODO change params
+    mergeSortParallel(0); 
     
     // Wait for all threads to finish.
     for (thread = 1; thread < thread_count; thread++) {
@@ -93,53 +95,33 @@ int main(int argc, char* argv[]) {
     (double) (tv2.tv_sec - tv1.tv_sec);
     
     //TODO check that sorted lists match (that parallel sorted correctly)
-    
+  
     // Print results.
-    printf("Serial time = %e\n", serialTime);
+   printf("Serial time = %e\n", serialTime);
     printf("Parallel time = %e\n", parallelTime);
     double speedup = serialTime / parallelTime;
     double efficiency = speedup / thread_count;
     printf("Speedup = %e\n", speedup);
     printf("Efficiency = %e\n", efficiency);
-    */
-
-    SArray = malloc(sizeof(int)*8);
-    int k;
-    for(k=0;k<8;k++){
-	SArray[k]=rand() %7;
-    }
-    int j;
-    printf("Serial: \n");
-    for(j=0; j<= 7; j++){
-	printf("%d \n", SArray[j]);
-    }
-    temporary = malloc(sizeof(int)*8);
-    int i;
-    mergeSortSerial(temporary, 0, 7);
-    printf("Sorted: \n");
-    for(i=0; i< 7; i++){
-	printf("%d \n", SArray[i]);
-    }
 	
     return 0;
 }  /* main */
 
-void mergeSortSerial(int tmp[], int l, int r){
+void mergeSortSerial(int l, int r){
     int m;
     if(r>l){
 	m=(r+l)/2 +1;
-	mergeSortSerial(tmp, l, m-1);
-	mergeSortSerial(tmp, m,r);
-	merge(tmp,l,m,r);
+	mergeSortSerial(l, m-1);
+	mergeSortSerial(m,r);
+	merge(l,m,r);
     }
     return;
 } /* mergeSortSerial */ 
 
-void merge(int tmp[], int l, int m, int r){
+void merge(int l, int m, int r){
     int lsaved=l;
-    int lm, len, i;
+    int lm, i;
     lm = m-1;
-    len = r - l + 1;
     i = l;
 
     while(l <= lm && m <= r){

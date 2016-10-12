@@ -13,13 +13,15 @@ void mergeSortParallel(void* rank);
 extern int thread_count;
 extern pthread_mutex_t * lock;
 extern int arraySize;
-extern int SArray[], PArray[];
+extern int * SArray, * PArray;
 
 
 void mergeSortParallel(void* rank) {
+	printf("I'm thread %d and i made it to mergeSortParallel \n", (long) rank);
     
+/*
     // Get rank of this thread.
-    long myRank = (long) rank;  /* Use long in case of 64-bit system */
+    long myRank = (long) rank;  /* Use long in case of 64-bit system *
     
     // Compute starting and ending indices for this thread to merge.
     long quotient = sizeof(PArray) / thread_count;
@@ -38,7 +40,8 @@ void mergeSortParallel(void* rank) {
     
     // TODO sort assigned subarray
     
+*/
 
-    return NULL;
+    return;
 }
 

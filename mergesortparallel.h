@@ -6,7 +6,6 @@
 #include <pthread.h>
 
 /* Global variables */
-int thread_count;
+int thread_count, arraySize;
 pthread_mutex_t * lock;
-int arraySize;
-int SArray[], PArray[];
+int * SArray, * PArray,  * tmp;
