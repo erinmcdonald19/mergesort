@@ -23,8 +23,8 @@ void merge(int tmp[], int l, int m, int r);
 const int MAX_THREADS = 64;
 const int MAX_NAME_LEN = 10;
 
-int SArray[8];
-
+int * SArray;
+int * temporary;
 /*--------------------------------------------------------------------*/
 int main(int argc, char* argv[]) {
     /*
@@ -103,7 +103,6 @@ int main(int argc, char* argv[]) {
     printf("Efficiency = %e\n", efficiency);
     */
 
-    int* SArray;
     SArray = malloc(sizeof(int)*8);
     int k;
     for(k=0;k<8;k++){
@@ -111,19 +110,17 @@ int main(int argc, char* argv[]) {
     }
     int j;
     printf("Serial: \n");
-    for(j=0; j< sizeof(SArray); j++){
+    for(j=0; j<= 7; j++){
 	printf("%d \n", SArray[j]);
     }
-    int temporary[sizeof(SArray)];
-    mergeSortSerial(temporary, 0, sizeof(SArray)-1);
+    temporary = malloc(sizeof(int)*8);
     int i;
+    mergeSortSerial(temporary, 0, 7);
     printf("Sorted: \n");
-    for(i=0; i< sizeof(SArray); i++){
+    for(i=0; i< 7; i++){
 	printf("%d \n", SArray[i]);
     }
 	
-    free(SArray);    
-
     return 0;
 }  /* main */
 
@@ -139,6 +136,7 @@ void mergeSortSerial(int tmp[], int l, int r){
 } /* mergeSortSerial */ 
 
 void merge(int tmp[], int l, int m, int r){
+    int lsaved=l;
     int lm, len, i;
     lm = m-1;
     len = r - l + 1;
@@ -167,7 +165,7 @@ void merge(int tmp[], int l, int m, int r){
 	i++;
     }
     int k;
-    for(k=0; k<= len; k++){
+    for(k=lsaved; k<= r; k++){
 	SArray[k] = tmp[k];
     }
     return;

@@ -3,6 +3,7 @@
  *
  * Erin McDonald & Michael Franklin
  */
+#include <pthread.h>
 
 /* Global variables */
 int thread_count;
