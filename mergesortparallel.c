@@ -18,5 +18,28 @@ extern int SArray[], PArray[];
 //TODO: create mergeSortParallel function
 
 void mergeSortParallel(void* rank) {
+    
+    // Get rank of this thread.
+    long myRank = (long) rank;  /* Use long in case of 64-bit system */
+    
+    // Compute starting and ending indices for this thread to merge.
+    long quotient = sizeof(PArray) / thread_count;
+    long remainder = sizeof(PArray) % thread_count;
+    long myCount;
+    long myFirsti, myLasti;
+    if (myRank < remainder) {
+        myCount = quotient + 1;
+        myFirsti = myRank * myCount;
+    }
+    else {
+        myCount = quotient;
+        myFirsti = myRank * myCount + remainder;
+    }
+    myLasti = myFirsti + myCount;
+    
+    // TODO sort assigned subarray
+    
 
+    return NULL;
 }
+
