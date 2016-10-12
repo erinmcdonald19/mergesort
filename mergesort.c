@@ -10,28 +10,24 @@
 #include <sys/time.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <mergesortparallel.h>
+//#include <mergesortparallel.h>
 
 #include <unistd.h> // For sysconf
 
 /* Function declarations */
 void usage(char* prog_name);
-void mergeSortSerial(int start, int end);
+void mergeSortSerial(int tmp[], int l, int r);
+void merge(int tmp[], int l, int m, int r);
 
 /* Global constants */
 const int MAX_THREADS = 64;
 const int MAX_NAME_LEN = 10;
 
-/* Global variables */
-int thread_count;
-pthread_mutex_t * lock;
-int arraySize;
-int SArray[], PArray[];
-
+int SArray[8];
 
 /*--------------------------------------------------------------------*/
 int main(int argc, char* argv[]) {
-    
+    /*
     // Get number of threads from command line
     if (argc != 3)
         usage(argv[0]);
@@ -65,7 +61,7 @@ int main(int argc, char* argv[]) {
     long thread;  // Use long in case of a 64-bit system
     gettimeofday(&tv1, NULL);
     
-    // Intialize lock, and sumParallel to 0.
+    // Intialize lock
     if ((lock = malloc(sizeof(pthread_mutex_t))) == NULL) {
         printf("Error allocating memory for lock\n");
         exit(1);
@@ -75,14 +71,13 @@ int main(int argc, char* argv[]) {
         printf("Error initializing lock\n");
         exit(code);
     }
-    sumParallel = 0;
     
     // Create and launch the threads.
     pthread_t* thread_handles;
     thread_handles = malloc (thread_count*sizeof(pthread_t));
     for (thread = 1; thread < thread_count; thread++) {
         pthread_create(&thread_handles[thread], NULL,
-                       arraySumParallel, (void*) thread);
+                       mergeSortParallel, (void*) thread);
     }
     mergeSortParallel(0); //TODO change params
     
@@ -97,10 +92,7 @@ int main(int argc, char* argv[]) {
     double parallelTime = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
     (double) (tv2.tv_sec - tv1.tv_sec);
     
-    // Check that parallel sum is correct.
-    if (sumSerial != sumParallel) {
-        printf("Incorrect parallel sum.");
-    }
+    //TODO check that sorted lists match (that parallel sorted correctly)
     
     // Print results.
     printf("Serial time = %e\n", serialTime);
@@ -109,58 +101,79 @@ int main(int argc, char* argv[]) {
     double efficiency = speedup / thread_count;
     printf("Speedup = %e\n", speedup);
     printf("Efficiency = %e\n", efficiency);
-    
-    
+    */
+
+    int* SArray;
+    SArray = malloc(sizeof(int)*8);
+    int k;
+    for(k=0;k<8;k++){
+	SArray[k]=rand() %7;
+    }
+    int j;
+    printf("Serial: \n");
+    for(j=0; j< sizeof(SArray); j++){
+	printf("%d \n", SArray[j]);
+    }
+    int temporary[sizeof(SArray)];
+    mergeSortSerial(temporary, 0, sizeof(SArray)-1);
+    int i;
+    printf("Sorted: \n");
+    for(i=0; i< sizeof(SArray); i++){
+	printf("%d \n", SArray[i]);
+    }
+	
+    free(SArray);    
+
     return 0;
 }  /* main */
 
-/*------------------------------------------------------------------
- * Compute sum of array ar and return. */
-long arraySumSerial(long len, int ar []) {
-    long sum = 0;
-    for (long i = 0; i < len; i++) {
-        sum += ar[i];
+void mergeSortSerial(int tmp[], int l, int r){
+    int m;
+    if(r>l){
+	m=(r+l)/2 +1;
+	mergeSortSerial(tmp, l, m-1);
+	mergeSortSerial(tmp, m,r);
+	merge(tmp,l,m,r);
     }
-    return sum;
-}
+    return;
+} /* mergeSortSerial */ 
 
-/*-------------------------------------------------------------------*/
-/* Compute sum of global array vec in parallel. */
-void * arraySumParallel(void* rank) {
-    
-    // Get rank of this thread.
-    long myRank = (long) rank;  /* Use long in case of 64-bit system */
-    
-    // Compute starting and ending indices for this thread to sum.
-    long quotient = VECTOR_LEN / thread_count;
-    long remainder = VECTOR_LEN % thread_count;
-    long myCount;
-    long myFirsti, myLasti;
-    if (myRank < remainder) {
-        myCount = quotient + 1;
-        myFirsti = myRank * myCount;
-    }
-    else {
-        myCount = quotient;
-        myFirsti = myRank * myCount + remainder;
-    }
-    myLasti = myFirsti + myCount;
-    
-    // Compute partial sum for this thread, and store in global partial sum array.
-    long temp = 0;
-    for (long i = myFirsti; i < myLasti; i++) {
-        temp += vec[i];
-    }
-    
-    // Add partial sum to sumParallel in critical section.
-    pthread_mutex_lock(lock);
-    sumParallel += temp;
-    pthread_mutex_unlock(lock);
-        
-    return NULL;
-}
+void merge(int tmp[], int l, int m, int r){
+    int lm, len, i;
+    lm = m-1;
+    len = r - l + 1;
+    i = l;
 
-/*-------------------------------------------------------------------*/
+    while(l <= lm && m <= r){
+	if(SArray[l] <= SArray[m]){
+	    tmp[i] = SArray[l];
+	    i++;
+	    l++;
+	}
+	else{
+	    tmp[i]=SArray[m];
+	    i++;
+	    m++;
+	}
+    }
+    while(l <= lm){
+	tmp[i] = SArray[l];
+	l++;
+	i++;
+    }
+    while(m <= r){
+	tmp[i] = SArray[m];
+	m++;
+	i++;
+    }
+    int k;
+    for(k=0; k<= len; k++){
+	SArray[k] = tmp[k];
+    }
+    return;
+
+} /* merge */
+
 void usage(char* prog_name) {
     fprintf(stderr, "usage: %s <number of threads>\n", prog_name);
     fprintf(stderr, "0 < number of threads <= %d\n", MAX_THREADS);
