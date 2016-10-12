@@ -10,12 +10,13 @@
 #include <sys/time.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <semaphore.h>
+#include <mergesortparallel.h>
 
 #include <unistd.h> // For sysconf
 
 /* Function declarations */
 void usage(char* prog_name);
+void mergeSortSerial(int start, int end);
 
 /* Global constants */
 const int MAX_THREADS = 64;
@@ -25,6 +26,7 @@ const int MAX_NAME_LEN = 10;
 int thread_count;
 pthread_mutex_t * lock;
 int arraySize;
+int SArray[], PArray[];
 
 
 /*--------------------------------------------------------------------*/
@@ -37,20 +39,24 @@ int main(int argc, char* argv[]) {
     if (thread_count <= 0 || thread_count > MAX_THREADS)
         usage(argv[0]);
     arraySize = (int) strtol(argv[2], NULL, 10);
-    if(arraySize =
+    if(arraySize <= 0)
+        usage(argv[0]);
 
     // For timing
     struct timeval  tv1, tv2;
-    
+
+    int val;
     // Fill array with random numbers
     srandom((unsigned int) time(NULL));
-    for (long i = 0; i < VECTOR_LEN; i++) {
-        vec[i] = rand();
+    for (long i = 0; i < arraySize; i++) {
+        val = rand();
+        SArray[i] = val;
+        PArray[i] = val;
     }
     
     // Compute sum with serial code
     gettimeofday(&tv1, NULL); // start timing
-    sumSerial = arraySumSerial(VECTOR_LEN, vec);
+    SArray = mergeSortSerial(VECTOR_LEN, vec); //TODO: change params
     gettimeofday(&tv2, NULL); // stop timing
     double serialTime = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
     (double) (tv2.tv_sec - tv1.tv_sec);
@@ -78,7 +84,7 @@ int main(int argc, char* argv[]) {
         pthread_create(&thread_handles[thread], NULL,
                        arraySumParallel, (void*) thread);
     }
-    arraySumParallel(0);
+    mergeSortParallel(0); //TODO change params
     
     // Wait for all threads to finish.
     for (thread = 1; thread < thread_count; thread++) {
