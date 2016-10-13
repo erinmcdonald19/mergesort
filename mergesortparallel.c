@@ -34,23 +34,28 @@ void getIndices(long myRank, long *myFirsti, long *myLasti){
         *myFirsti = myRank * myCount + remainder;
     }
     *myLasti = *myFirsti + myCount - 1;
-    printf("I'm thread: %d with First: %d, Last %d \n", myRank, *myFirsti, *myLasti);
 
     return;
 }
 
 int getSplit(long first, long last, long mid){
 
-		int split, k;
-		for(k=first; k=last; k++){
-		    if(PArray[mid]<PArray[k]){
-			continue;
-		    }
-		    else{
-			split = k;
-			return split;
-		    }
-		}
+	printf("First: %d, Last: %d \n", first, last);
+
+	if(first>=last){
+	    return first;
+	}
+	else{
+	    int middle = (last+first)/2;
+	    if(PArray[mid]<= PArray[middle]){
+		getSplit(first, middle -1, mid);
+	    }
+	    else{
+		getSplit(middle, last, mid);
+	    }
+	}
+
+    return -1;
 }
 
 void mergeSortParallel(void* rank) {
@@ -70,26 +75,34 @@ void mergeSortParallel(void* rank) {
     int difference = 1;
     long partner;
     int split;
-    
+    long partnerFirst, partnerLast;
+    int mid;
+
     while (difference < thread_count) {
 	// Partner 1
         if (myRank % divisor == 0) {
             partner = myRank + difference;
             if (partner < thread_count) {
-                long partnerFirst, partnerLast;
-		        getIndices(partner, &partnerFirst, &partnerLast);
-		        int mid = (myLasti-myFirsti)/2;
+		//Find where to split partner array
+		getIndices(partner, &partnerFirst, &partnerLast);
+		printf("Past get indices for even thread\n");
+		mid = (myLasti-myFirsti)/2;
                 split = getSplit(partnerFirst, partnerLast, mid);
-                printf("Debug1: made it here difference = %d \n", difference);
+
+                printf("Debug1: past split, difference = %d \n", difference);
                 //TODO condition variable
 		        //TODO merge x1 (myFirst -> split -1) y1 (myPartnerFirst -> split -1)
             }
         }
 	//Partner 2
         else {
+	    // Find where to split array based on partner
             partner = myRank - difference;
-            split = getSplit(myFirsti, myLasti);
-            printf("Debug2: made it here \n");
+	    getIndices(partner, &partnerFirst, &partnerLast);
+	    printf("Past get indices for odd threads\n");
+	    mid = (partnerLast - partnerFirst)/2;
+            split = getSplit(myFirsti, myLasti, mid);
+            printf("Debug2: Past split \n");
             //TODO condition variable
 	        //TODO merge x2 y2
             break;
