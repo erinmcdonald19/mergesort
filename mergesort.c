@@ -17,12 +17,15 @@
 
 /* Function declarations */
 void usage(char* prog_name);
-void mergeSortSerial(int l, int r);
-void merge(int l, int m, int r);
+void mergeSortSerial(int l, int r, int parallel_subsort);
 
 /* Global constants */
 const int MAX_THREADS = 64;
-const int MAX_NAME_LEN = 10;
+
+/* Global variables */
+int thread_count, arraySize;
+pthread_mutex_t * lock;
+int * SArray, * PArray, * tmp;
 
 /*--------------------------------------------------------------------*/
 int main(int argc, char* argv[]) {
@@ -43,18 +46,26 @@ int main(int argc, char* argv[]) {
     tmp = malloc(sizeof(int)*arraySize);
     int val,i;
     // Fill array with random numbers
+    printf("Unsorted: \n");
+    srand(time(NULL));
     for(i = 0; i < arraySize; i++){
-        val = rand();
+        val = rand() %10;
         SArray[i] = val;
 	PArray[i] = val;
+	printf("%d \n", val);
     }
+    
 
     // For timing
    struct timeval  tv1, tv2;
   
     // Compute sum with serial code
     gettimeofday(&tv1, NULL); // start timing
-    mergeSortSerial(0, arraySize-1);
+    mergeSortSerial(0, arraySize-1,0);
+    printf("Serially sorted: \n");
+    for(i=0; i<arraySize; i++){
+	printf("%d \n", SArray[i]);
+    }
     gettimeofday(&tv2, NULL); // stop timing
     double serialTime = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
     (double) (tv2.tv_sec - tv1.tv_sec);
@@ -97,7 +108,7 @@ int main(int argc, char* argv[]) {
     //TODO check that sorted lists match (that parallel sorted correctly)
   
     // Print results.
-   printf("Serial time = %e\n", serialTime);
+    printf("Serial time = %e\n", serialTime);
     printf("Parallel time = %e\n", parallelTime);
     double speedup = serialTime / parallelTime;
     double efficiency = speedup / thread_count;
@@ -107,52 +118,18 @@ int main(int argc, char* argv[]) {
     return 0;
 }  /* main */
 
-void mergeSortSerial(int l, int r){
+void mergeSortSerial(int l, int r, int parallel_subsort){
     int m;
     if(r>l){
 	m=(r+l)/2 +1;
-	mergeSortSerial(l, m-1);
-	mergeSortSerial(m,r);
-	merge(l,m,r);
+	mergeSortSerial(l, m-1, parallel_subsort);
+	mergeSortSerial(m,r, parallel_subsort);
+	merge(l,m,r, parallel_subsort);
     }
     return;
 } /* mergeSortSerial */ 
 
-void merge(int l, int m, int r){
-    int lsaved=l;
-    int lm, i;
-    lm = m-1;
-    i = l;
 
-    while(l <= lm && m <= r){
-	if(SArray[l] <= SArray[m]){
-	    tmp[i] = SArray[l];
-	    i++;
-	    l++;
-	}
-	else{
-	    tmp[i]=SArray[m];
-	    i++;
-	    m++;
-	}
-    }
-    while(l <= lm){
-	tmp[i] = SArray[l];
-	l++;
-	i++;
-    }
-    while(m <= r){
-	tmp[i] = SArray[m];
-	m++;
-	i++;
-    }
-    int k;
-    for(k=lsaved; k<= r; k++){
-	SArray[k] = tmp[k];
-    }
-    return;
-
-} /* merge */
 
 void usage(char* prog_name) {
     fprintf(stderr, "usage: %s <number of threads>\n", prog_name);

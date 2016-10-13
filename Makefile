@@ -1,5 +1,10 @@
 CC=gcc
-CFLAGS= -pthread -Wall -o
+CFLAGS= -pthread -Wall 
 
 mergesort: mergesort.c
-	$(CC) $(CFLAGS) $@ $<
+	$(CC) $(CFLAGS) -o $@ $<
+
+mergesortparallel: mergesortparallel.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
