@@ -39,6 +39,20 @@ void getIndices(long myRank, long *myFirsti, long *myLasti){
     return;
 }
 
+int getSplit(long first, long last, long mid){
+
+		int split, k;
+		for(k=first; k=last; k++){
+		    if(PArray[mid]<PArray[k]){
+			continue;
+		    }
+		    else{
+			split = k;
+			return split;
+		    }
+		}
+}
+
 void mergeSortParallel(void* rank) {
  
     // Get rank of this thread.
@@ -55,34 +69,32 @@ void mergeSortParallel(void* rank) {
     int divisor = 2;
     int difference = 1;
     long partner;
+    int split;
     
     while (difference < thread_count) {
 	// Partner 1
         if (myRank % divisor == 0) {
             partner = myRank + difference;
             if (partner < thread_count) {
-		long partnerFirst, partnerLast;
-		getIndices(partner, &partnerFirst, &partnerLast);
-		int mid = (myLasti-myFirsti)/2;
-		int split, k;
-		for(k=partnerFirst; k=partnerLast; k++){
-		    if(PArray[mid]<PArray[k]){
-			continue;
-		    }
-		    else{
-			split = k;
-		    }
-		}
+                long partnerFirst, partnerLast;
+		        getIndices(partner, &partnerFirst, &partnerLast);
+		        int mid = (myLasti-myFirsti)/2;
+                split = getSplit(partnerFirst, partnerLast, mid);
+                printf("Debug1: made it here difference = %d \n", difference);
                 //TODO condition variable
-		//TODO merge x1 (myFirst -> split -1) y1 (myPartnerFirst -> split -1)
+		        //TODO merge x1 (myFirst -> split -1) y1 (myPartnerFirst -> split -1)
             }
         }
 	//Partner 2
         else {
+            partner = myRank - difference;
+            split = getSplit(myFirsti, myLasti);
+            printf("Debug2: made it here \n");
             //TODO condition variable
-	    //TODO merge x2 y2
+	        //TODO merge x2 y2
             break;
         }
+        printf("Debug3: made it here \n");
         divisor *= 2;
         difference *= 2;
     }
