@@ -42,18 +42,7 @@ int getSplit(long first, long last, long mid){
 
 	printf("First: %d, Last: %d \n", first, last);
 
-	if(first>=last){
-	    return first;
-	}
-	else{
-	    int middle = (last+first)/2;
-	    if(PArray[mid]<= PArray[middle]){
-		getSplit(first, middle -1, mid);
-	    }
-	    else{
-		getSplit(middle, last, mid);
-	    }
-	}
+	//TODO binary search for insert position
 
     return -1;
 }
