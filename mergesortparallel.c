@@ -18,6 +18,7 @@ void getIndices(long rank, long * first, long * last);
 /* Global variables */
 extern int thread_count, arraySize;
 extern pthread_mutex_t * lock;
+extern pthread_cond_t * merged;
 extern int * SArray, * PArray, * tmp;
 
 void getIndices(long myRank, long *myFirsti, long *myLasti){
@@ -63,37 +64,21 @@ void mergeSortParallel(void* rank) {
     int divisor = 2;
     int difference = 1;
     long partner;
-    int split;
     long partnerFirst, partnerLast;
-    int mid;
 
     while (difference < thread_count) {
 	// Partner 1
         if (myRank % divisor == 0) {
             partner = myRank + difference;
             if (partner < thread_count) {
-		//Find where to split partner array
 		getIndices(partner, &partnerFirst, &partnerLast);
-		printf("Past get indices for even thread\n");
-		mid = (myLasti-myFirsti)/2;
-                split = getSplit(partnerFirst, partnerLast, mid);
-
-                printf("Debug1: past split, difference = %d \n", difference);
-                //TODO condition variable
-		        //TODO merge x1 (myFirst -> split -1) y1 (myPartnerFirst -> split -1)
+		pthread_cond_wait(&merged[partner], lock);
+		merge(myFirsti, myLasti, partnerLast, 1);
             }
         }
 	//Partner 2
         else {
-	    // Find where to split array based on partner
-            partner = myRank - difference;
-	    getIndices(partner, &partnerFirst, &partnerLast);
-	    printf("Past get indices for odd threads\n");
-	    mid = (partnerLast - partnerFirst)/2;
-            split = getSplit(myFirsti, myLasti, mid);
-            printf("Debug2: Past split \n");
-            //TODO condition variable
-	        //TODO merge x2 y2
+	    pthread_cond_signal(&merged[myRank]);
             break;
         }
         printf("Debug3: made it here \n");
@@ -161,6 +146,12 @@ void merge(int l, int m, int r, int p_s){
     int k;
     for(k=lsaved; k<= r; k++){
 	arr[k] = tmp[k];
+    }
+    if(p_s==1){
+	memcpy(PArray, arr, arraySize);
+    }
+    else{
+	memcpy(SArray, arr, arraySize);
     }
     return;
 

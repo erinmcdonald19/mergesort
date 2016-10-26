@@ -25,6 +25,7 @@ const int MAX_THREADS = 64;
 /* Global variables */
 int thread_count, arraySize;
 pthread_mutex_t * lock;
+pthread_cond_t * merged;
 int * SArray, * PArray, * tmp;
 
 /*--------------------------------------------------------------------*/
@@ -84,7 +85,18 @@ int main(int argc, char* argv[]) {
         printf("Error initializing lock\n");
         exit(code);
     }
+
+    // Create the semaphores.
+    merged = malloc(sizeof(pthread_cond_t *) * thread_count);
     
+    // Intialize the semaphores
+    for (thread = 0; thread < thread_count; thread++) {
+        pthread_cond_t * cond_var;
+	cond_var = malloc(sizeof(pthread_cond_t));
+        pthread_cond_init(cond_var, NULL);
+	merged[thread] = * cond_var;
+    }
+
     // Create and launch the threads.
     pthread_t* thread_handles;
     thread_handles = malloc (thread_count*sizeof(pthread_t));
