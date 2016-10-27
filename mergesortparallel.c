@@ -13,7 +13,7 @@
 /* Function Declarations */
 void mergeSortParallel(void* rank);
 extern void mergeSortSerial(int l, int r, int parallel_subsort);
-void merge(int l, int m, int r, int p_s);
+void merge(int l, int lm, int m, int r, int p_s);
 void getIndices(long rank, long * first, long * last);
 void barrier(int threads);
 
@@ -79,7 +79,7 @@ void mergeSortParallel(void* rank) {
 		printf("diff: %d, firsti: %d, partnerfirst: %d, last: %d \n",difference, myFirsti, partnerFirst, partnerLast);
 		partnerLast += ((difference-1)*(arraySize/threadCount));
 		printf("newLast: %d \n", partnerLast);
-		merge(myFirsti, partnerFirst, partnerLast, 1);
+		merge(myFirsti, partnerFirst, partnerFirst, partnerLast, 1);
             }
         }
 	//Partner 2
@@ -108,14 +108,10 @@ void mergeSortParallel(void* rank) {
 
 void merge(int l, int lm, int m, int r, int p_s){
     int lsaved=l;
-	//int lm;
     int i;
-    //if(m>0){
-    //    lm = m-1;
-    //}
-    //else{
-	//lm=0;
-    //}
+    if(m>0){
+        lm = m-1;
+    }
     i = l;
 
     int * arr;
@@ -177,26 +173,26 @@ void barrier(int threads){
     return;
 }
 
-int binarySearch(int first, int last, int item){
-    if(last<=first){
-	if(item > vecParallel[first]){
-	    return low+1;
-	}
-	else{
-	    return low;
-	}
-    }
-    int mid = (first+last)/2;
-    if(item == vecParallel[mid]){
-	return mid+1;
-    }
-    if(item> vecParallel[mid]){
-	return binarySearch(mid+1, last, item);
-    }
-    else{
-	return binarySearch(first, mid-1);
-    }
-}
+//int binarySearch(int first, int last, int item){
+  //  if(last<=first){
+//	if(item > vecParallel[first]){
+//	    return low+1;
+//	}
+//	else{
+//	    return low;
+//	}
+  //  }
+    //int mid = (first+last)/2;
+    //if(item == vecParallel[mid]){
+//	return mid+1;
+  //  }
+    //if(item> vecParallel[mid]){
+//	return binarySearch(mid+1, last, item);
+  //  }
+    //else{
+//	return binarySearch(first, mid-1);
+  //  }
+//}
 void mergeRec(int first, int lmid, int mid, int last, int active_threads) {
     if(active_threads == 1) {
 	merge(first, lmid, mid, last);
@@ -206,11 +202,12 @@ void mergeRec(int first, int lmid, int mid, int last, int active_threads) {
 	int y_mid = binarySearch(first, lmid, vecParallel[x_mid]);
 	if(myRank < (active_threads / 2) {
     	    mergeRec(first, x_mid, (mid + 1), y_mid);
+	}
 	else {
 	    mergeRec((x_mid + 1), lmid, (y_mid + 1), last);
 	}
     }
-	
+}
 
 
 
