@@ -8,23 +8,26 @@
 
 
 #include <pthread.h>
+#include <string.h>
 
 /* Function Declarations */
 void mergeSortParallel(void* rank);
 extern void mergeSortSerial(int l, int r, int parallel_subsort);
 void merge(int l, int m, int r, int p_s);
 void getIndices(long rank, long * first, long * last);
+void barrier(int threads);
 
 /* Global variables */
-extern int thread_count, arraySize;
+extern int threadCount, arraySize, count;
 extern pthread_mutex_t * lock;
-extern pthread_cond_t * merged;
-extern int * SArray, * PArray, * tmp;
+extern pthread_cond_t c_v;
+extern int * vecSerial, * vecParallel, * temp;
+
 
 void getIndices(long myRank, long *myFirsti, long *myLasti){
     // Compute starting and ending indices for this thread to merge.
-    long quotient = arraySize / thread_count;
-    long remainder = arraySize % thread_count;
+    long quotient = arraySize / threadCount;
+    long remainder = arraySize % threadCount;
     long myCount;
     if (myRank < remainder) {
         myCount = quotient + 1;
@@ -49,51 +52,52 @@ int getSplit(long first, long last, long mid){
 }
 
 void mergeSortParallel(void* rank) {
- 
+     
     // Get rank of this thread.
     long myRank = (long) rank;  /* Use long in case of 64-bit system */
+    
     long myFirsti, myLasti;
     getIndices(myRank, &myFirsti, &myLasti);
     
     //sort assigned subarray
     mergeSortSerial(myFirsti, myLasti, 1);
-
-   //TODO sync here with condition variable
-
+    barrier(threadCount);
    //tree based reduction
     int divisor = 2;
     int difference = 1;
     long partner;
     long partnerFirst, partnerLast;
 
-    while (difference < thread_count) {
+    while (difference < threadCount) {
+
 	// Partner 1
         if (myRank % divisor == 0) {
             partner = myRank + difference;
-            if (partner < thread_count) {
+            if (partner < threadCount) {
 		getIndices(partner, &partnerFirst, &partnerLast);
-		pthread_cond_wait(&merged[partner], lock);
-		merge(myFirsti, myLasti, partnerLast, 1);
+		barrier(threadCount/divisor);
+		printf("diff: %d, firsti: %d, partnerfirst: %d, last: %d \n",difference, myFirsti, partnerFirst, partnerLast);
+		partnerLast += ((difference-1)*(arraySize/threadCount));
+		printf("newLast: %d \n", partnerLast);
+		merge(myFirsti, partnerFirst, partnerLast, 1);
             }
         }
 	//Partner 2
         else {
-	    pthread_cond_signal(&merged[myRank]);
+	    printf("Thread %d Here \n", myRank);
             break;
         }
-        printf("Debug3: made it here \n");
+
         divisor *= 2;
         difference *= 2;
     }
 
     
-
-
     if(rank ==0){
 	int i;
     	printf("Partially sorted: \n");
     	for(i=0; i<arraySize; i++){
-		printf("%d \n", PArray[i]);
+		printf("%d \n", vecParallel[i]);
    	 }
     }
     
@@ -115,45 +119,60 @@ void merge(int l, int m, int r, int p_s){
 
     int * arr;
     if(p_s==1){
-	arr = PArray;
+	arr = vecParallel;
     }
     else{
-	arr = SArray;
+	arr = vecSerial;
     }
 
     while(l <= lm && m <= r){
 	if(arr[l] <= arr[m]){
-	    tmp[i] = arr[l];
+	    temp[i] = arr[l];
 	    i++;
 	    l++;
 	}
 	else{
-	    tmp[i]=arr[m];
+	    temp[i]=arr[m];
 	    i++;
 	    m++;
 	}
     }
     while(l <= lm){
-	tmp[i] = arr[l];
+	temp[i] = arr[l];
 	l++;
 	i++;
     }
     while(m <= r){
-	tmp[i] = arr[m];
+	temp[i] = arr[m];
 	m++;
 	i++;
     }
     int k;
     for(k=lsaved; k<= r; k++){
-	arr[k] = tmp[k];
+	arr[k] = temp[k];
     }
     if(p_s==1){
-	memcpy(PArray, arr, arraySize);
+	memcpy(vecParallel, arr, arraySize);
     }
     else{
-	memcpy(SArray, arr, arraySize);
+	memcpy(vecSerial, arr, arraySize);
     }
     return;
 
 } /* merge */
+
+void barrier(int threads){
+    pthread_mutex_lock(lock);
+    count++;
+    printf("count: %d \n", count);
+    if(count==threads){
+	count=0;
+	pthread_cond_broadcast(&c_v);
+    }
+    else{
+	while(pthread_cond_wait(&c_v, lock) != 0);
+    }
+    pthread_mutex_unlock(lock);
+    return;
+}
 

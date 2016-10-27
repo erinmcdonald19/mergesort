@@ -6,7 +6,7 @@
 #include <pthread.h>
 
 /* Global variables */
-int thread_count, arraySize;
+int threadCount, arraySize, count;
 pthread_mutex_t * lock;
-pthread_cond_t * merged;
-int * SArray, * PArray,  * tmp;
+pthread_cond_t c_v;
+int *  vecSerial, * vecParallel,  * temp;

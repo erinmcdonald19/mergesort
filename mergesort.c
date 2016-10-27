@@ -23,10 +23,10 @@ void mergeSortSerial(int l, int r, int parallel_subsort);
 const int MAX_THREADS = 64;
 
 /* Global variables */
-int thread_count, arraySize;
+int threadCount, arraySize, count;
 pthread_mutex_t * lock;
-pthread_cond_t * merged;
-int * SArray, * PArray, * tmp;
+pthread_cond_t c_v;
+int * vecSerial, * vecParallel, * temp;
 
 /*--------------------------------------------------------------------*/
 int main(int argc, char* argv[]) {
@@ -34,25 +34,25 @@ int main(int argc, char* argv[]) {
     // Get number of threads from command line
     if (argc != 3)
         usage(argv[0]);
-    thread_count = (int) strtol(argv[1], NULL, 10);
-    if (thread_count <= 0 || thread_count > MAX_THREADS)
+    threadCount = (int) strtol(argv[1], NULL, 10);
+    if (threadCount <= 0 || threadCount > MAX_THREADS)
         usage(argv[0]);
     arraySize = (int) strtol(argv[2], NULL, 10);
     if(arraySize <= 0)
         usage(argv[0]);
 
     // allocate space for arrays
-    SArray = malloc(sizeof(int)*arraySize);
-    PArray = malloc(sizeof(int)*arraySize);
-    tmp = malloc(sizeof(int)*arraySize);
+    vecSerial = malloc(sizeof(int)*arraySize);
+    vecParallel = malloc(sizeof(int)*arraySize);
+    temp = malloc(sizeof(int)*arraySize);
     int val,i;
     // Fill array with random numbers
     printf("Unsorted: \n");
     srand(time(NULL));
     for(i = 0; i < arraySize; i++){
         val = rand() %10;
-        SArray[i] = val;
-	PArray[i] = val;
+        vecSerial[i] = val;
+	vecParallel[i] = val;
 	printf("%d \n", val);
     }
     
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
     mergeSortSerial(0, arraySize-1,0);
     printf("Serially sorted: \n");
     for(i=0; i<arraySize; i++){
-	printf("%d \n", SArray[i]);
+	printf("%d \n", vecSerial[i]);
     }
     gettimeofday(&tv2, NULL); // stop timing
     double serialTime = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
@@ -86,28 +86,22 @@ int main(int argc, char* argv[]) {
         exit(code);
     }
 
-    // Create the semaphores.
-    merged = malloc(sizeof(pthread_cond_t *) * thread_count);
+    // Create the condition variable
+    pthread_cond_t * ptr = malloc(sizeof(pthread_cond_t));
+    pthread_cond_init(ptr, NULL);
+    c_v = * ptr;
     
-    // Intialize the semaphores
-    for (thread = 0; thread < thread_count; thread++) {
-        pthread_cond_t * cond_var;
-	cond_var = malloc(sizeof(pthread_cond_t));
-        pthread_cond_init(cond_var, NULL);
-	merged[thread] = * cond_var;
-    }
-
     // Create and launch the threads.
     pthread_t* thread_handles;
-    thread_handles = malloc (thread_count*sizeof(pthread_t));
-    for (thread = 1; thread < thread_count; thread++) {
+    thread_handles = malloc (threadCount*sizeof(pthread_t));
+    for (thread = 1; thread < threadCount; thread++) {
         pthread_create(&thread_handles[thread], NULL,
                        mergeSortParallel, (void*) thread);
     }
     mergeSortParallel(0); 
     
     // Wait for all threads to finish.
-    for (thread = 1; thread < thread_count; thread++) {
+    for (thread = 1; thread < threadCount; thread++) {
         pthread_join(thread_handles[thread], NULL);
     }
     free(thread_handles);
@@ -123,7 +117,7 @@ int main(int argc, char* argv[]) {
     printf("Serial time = %e\n", serialTime);
     printf("Parallel time = %e\n", parallelTime);
     double speedup = serialTime / parallelTime;
-    double efficiency = speedup / thread_count;
+    double efficiency = speedup / threadCount;
     printf("Speedup = %e\n", speedup);
     printf("Efficiency = %e\n", efficiency);
 	
