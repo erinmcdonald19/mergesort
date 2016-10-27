@@ -203,7 +203,7 @@ void mergeRec(int first, int lmid, int mid, int last, int active_threads) {
     }
     else {
 	int x_mid = ((first + mid) / 2);
-	int y_mid = binarySearch(???);
+	int y_mid = binarySearch(first, lmid, vecParallel[x_mid]);
 	if(myRank < (active_threads / 2) {
     	    mergeRec(first, x_mid, (mid + 1), y_mid);
 	else {
