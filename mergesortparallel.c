@@ -106,15 +106,16 @@ void mergeSortParallel(void* rank) {
 }/* mergeSortParallel */
 
 
-void merge(int l, int m, int r, int p_s){
+void merge(int l, int lm, int m, int r, int p_s){
     int lsaved=l;
-    int lm, i;
-    if(m>0){
-        lm = m-1;
-    }
-    else{
-	lm=0;
-    }
+	//int lm;
+    int i;
+    //if(m>0){
+    //    lm = m-1;
+    //}
+    //else{
+	//lm=0;
+    //}
     i = l;
 
     int * arr;
@@ -175,4 +176,47 @@ void barrier(int threads){
     pthread_mutex_unlock(lock);
     return;
 }
+
+int binarySearch(int first, int last, int item){
+    if(last<=first){
+	if(item > vecParallel[first]){
+	    return low+1;
+	}
+	else{
+	    return low;
+	}
+    }
+    int mid = (first+last)/2;
+    if(item == vecParallel[mid]){
+	return mid+1;
+    }
+    if(item> vecParallel[mid]){
+	return binarySearch(mid+1, last, item);
+    }
+    else{
+	return binarySearch(first, mid-1);
+    }
+}
+void mergeRec(int first, int lmid, int mid, int last, int active_threads) {
+    if(active_threads == 1) {
+	merge(first, lmid, mid, last);
+    }
+    else {
+	int x_mid = ((first + mid) / 2);
+	int y_mid = binarySearch(???);
+	if(myRank < (active_threads / 2) {
+    	    mergeRec(first, x_mid, (mid + 1), y_mid);
+	else {
+	    mergeRec((x_mid + 1), lmid, (y_mid + 1), last);
+	}
+    }
+	
+
+
+
+
+
+
+
+
 

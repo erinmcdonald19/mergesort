@@ -130,7 +130,7 @@ void mergeSortSerial(int l, int r, int parallel_subsort){
 	m=(r+l)/2 +1;
 	mergeSortSerial(l, m-1, parallel_subsort);
 	mergeSortSerial(m,r, parallel_subsort);
-	merge(l,m,r, parallel_subsort);
+	merge(l,m,m,r, parallel_subsort);
     }
     return;
 } /* mergeSortSerial */ 
