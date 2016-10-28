@@ -27,6 +27,7 @@ int threadCount, arraySize, count;
 pthread_mutex_t * lock;
 pthread_cond_t c_v;
 int * vecSerial, * vecParallel, * temp;
+long * firstIndices, * lastIndices;
 
 /*--------------------------------------------------------------------*/
 int main(int argc, char* argv[]) {
@@ -45,6 +46,8 @@ int main(int argc, char* argv[]) {
     vecSerial = malloc(sizeof(int)*arraySize);
     vecParallel = malloc(sizeof(int)*arraySize);
     temp = malloc(sizeof(int)*arraySize);
+    firstIndices = malloc(sizeof(long)*threadCount);
+    lastIndices = malloc(sizeof(long)*threadCount);
     int val,i;
     // Fill array with random numbers
     printf("Unsorted: \n");
