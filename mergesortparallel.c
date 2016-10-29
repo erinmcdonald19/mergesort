@@ -49,13 +49,14 @@ void mergeSortParallel(void* rank) {
     long myRank = (long) rank;  /* Use long in case of 64-bit system */
     
     long myFirsti, myLasti;
+    int i;
     getIndices(myRank, &myFirsti, &myLasti);
     firstIndices[myRank] = myFirsti;
     lastIndices[myRank] = myLasti;
     
     //sort assigned subarray
     mergeSortSerial(myFirsti, myLasti, 1);
-    barrier(threadCount);
+    barrier();
    //tree based reduction
     int divisor = 2;
     int difference = 1;
@@ -68,27 +69,22 @@ void mergeSortParallel(void* rank) {
         midThread = (lastThread + firstThread) / 2;
 
         barrier();
-	    mergeRec(firstIndices[firstThread], lastIndices[firstThread], firstIndices[midThread], lastIndices[lastThread], divisor, firstIndices[midThread], firstThread, lastThread, myRank);
+	    mergeRec(firstIndices[firstThread], lastIndices[firstThread], firstIndices[midThread], lastIndices[lastThread], \
+                divisor, firstIndices[midThread], firstThread, lastThread, myRank);
         barrier();
 
         divisor *= 2;
         difference *= 2;
+        for(i = myFirsti; i <= myLasti; i++) {
+            vecParallel[i] = temp[i];
+        }
     }
 
     if(rank ==0){
-	    int i;
+	    int j;
     	printf("Partially sorted: \n");
-    	for(i=0; i<arraySize; i++){
-		printf("%d \n", vecParallel[i]);
-   	 }
-    }
-    memcpy(vecParallel, temp, arraySize);
-    
-    if(rank ==0){
-        int i;
-    	printf("Partially sorted: \n");
-    	for(i=0; i<arraySize; i++){
-		printf("%d \n", vecParallel[i]);
+    	for(j=0; j<arraySize; j++){
+		printf("%d \n", vecParallel[j]);
    	 }
     }
     
@@ -109,7 +105,11 @@ void merge(int l, int lm, int m, int r, int p_s, int copy_value){
             lm = 0;
         }
     }
-    i = l;
+
+    i = copy_value; // takes in to account for "right" thread merges that have variable starting copy indices due to
+                    // the variability of the length of the "left" string's merge after the binary search. For anything
+                    // other than the "right" thread, copy_value = l, though the right thread could have a copy_value
+                    // equal to l
 
     int * arr;
     if(p_s==1){
@@ -142,8 +142,10 @@ void merge(int l, int lm, int m, int r, int p_s, int copy_value){
 	    i++;
     }
     int k;
-    for(k=lsaved; k<= r; k++){
-	    arr[k] = temp[k];
+    if(p_s == 0) {
+        for (k = lsaved; k <= r; k++) {
+            arr[k] = temp[k];
+        }
     }
     if(p_s==0){
 	    memcpy(vecSerial, arr, arraySize);
@@ -188,19 +190,20 @@ int binarySearch(int first, int last, int item) {
 
 void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank) {
     if(thread_group == 1) {
-	    merge(first, lmid - 1, mid, last, 1, copy_value);
+	    merge(first, lmid, mid, last, 1, copy_value);
     }
     else {
 	    int x_mid = ((first + lmid) / 2);
 	    int y_mid = binarySearch(mid, last, vecParallel[x_mid]);
 	    int midThread = (lastThread + firstThread) / 2;
         if(myRank < midThread){
-    	    mergeRec(first, x_mid, (mid + 1), y_mid, (thread_group / 2), first, firstThread, midThread, myRank);
+    	    mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), first, firstThread, midThread - 1, myRank);
 	    }
 	    else {
-	        mergeRec((x_mid + 1), lmid, (y_mid + 1), last, (thread_group / 2), (x_mid + y_mid), midThread + 1, lastThread, myRank);
+	        mergeRec((x_mid + 1), lmid, y_mid, last, (thread_group / 2), (((x_mid - first) + (y_mid - mid)) + 1), midThread, lastThread, myRank);
 	    }
     }
+    return;
 }/*mergeRec*/
 
 
