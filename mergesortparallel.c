@@ -13,10 +13,10 @@
 /* Function Declarations */
 void mergeSortParallel(void* rank);
 extern void mergeSortSerial(int l, int r, int parallel_subsort);
-void merge(int l, int lm, int m, int r, int p_s);
+void merge(int l, int lm, int m, int r, int p_s, int copy_value);
 void getIndices(long rank, long * first, long * last);
 void barrier();
-void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int midThread);
+void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank);
 
 /* Global variables */
 extern int threadCount, arraySize, count;
@@ -59,7 +59,7 @@ void mergeSortParallel(void* rank) {
    //tree based reduction
     int divisor = 2;
     int difference = 1;
-    long firstThread, lastThread; //first and last thread in group
+    long firstThread, lastThread, midThread; //first and last thread in group
 
     while (difference < threadCount) {
 
@@ -68,7 +68,7 @@ void mergeSortParallel(void* rank) {
         midThread = (lastThread + firstThread) / 2;
 
         barrier();
-	    mergeRec(firstIndices[firstThread], lastIndices[firstThread], firstIndices[midThread], lastIndices[lastThread], divisor, firstIndices[midThread], midThread);
+	    mergeRec(firstIndices[firstThread], lastIndices[firstThread], firstIndices[midThread], lastIndices[lastThread], divisor, firstIndices[midThread], firstThread, lastThread, myRank);
         barrier();
         divisor *= 2;
         difference *= 2;
@@ -176,21 +176,22 @@ int binarySearch(int first, int last, int item) {
     if (item > vecParallel[mid]) {
         return binarySearch(mid + 1, last, item);
     } else {
-        return binarySearch(first, mid - 1);
+        return binarySearch(first, mid - 1, item);
     }
 }
-void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value) {
+void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank) {
     if(thread_group == 1) {
-	    merge(first, lmid - 1, mid, last, copy_value);
+	    merge(first, lmid - 1, mid, last, 1, copy_value);
     }
     else {
 	    int x_mid = ((first + lmid) / 2);
 	    int y_mid = binarySearch(mid, last, vecParallel[x_mid]);
-        if(){
-    	    mergeRec(first, x_mid, (mid + 1), y_mid, (thread_group / 2), first, );
+	    int midThread = (lastThread + firstThread) / 2;
+        if(myRank < midThread){
+    	    mergeRec(first, x_mid, (mid + 1), y_mid, (thread_group / 2), first, firstThread, midThread, myRank);
 	    }
 	    else {
-	        mergeRec((x_mid + 1), lmid, (y_mid + 1), last, (thread_group / 2), (x_mid + y_mid));
+	        mergeRec((x_mid + 1), lmid, (y_mid + 1), last, (thread_group / 2), (x_mid + y_mid), midThread + 1, lastThread, myRank);
 	    }
     }
 }
