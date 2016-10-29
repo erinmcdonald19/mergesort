@@ -189,6 +189,8 @@ int binarySearch(int first, int last, int item) {
 
 
 void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank) {
+
+
     if(thread_group == 1) {
 	    merge(first, lmid, mid, last, 1, copy_value);
     }
