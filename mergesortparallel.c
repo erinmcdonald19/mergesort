@@ -70,13 +70,22 @@ void mergeSortParallel(void* rank) {
         barrier();
 	    mergeRec(firstIndices[firstThread], lastIndices[firstThread], firstIndices[midThread], lastIndices[lastThread], divisor, firstIndices[midThread], firstThread, lastThread, myRank);
         barrier();
+
         divisor *= 2;
         difference *= 2;
     }
 
+    if(rank ==0){
+	    int i;
+    	printf("Partially sorted: \n");
+    	for(i=0; i<arraySize; i++){
+		printf("%d \n", vecParallel[i]);
+   	 }
+    }
+    memcpy(vecParallel, temp, arraySize);
     
     if(rank ==0){
-	int i;
+        int i;
     	printf("Partially sorted: \n");
     	for(i=0; i<arraySize; i++){
 		printf("%d \n", vecParallel[i]);
@@ -104,43 +113,40 @@ void merge(int l, int lm, int m, int r, int p_s, int copy_value){
 
     int * arr;
     if(p_s==1){
-	arr = vecParallel;
+	    arr = vecParallel;
     }
     else{
-	arr = vecSerial;
+	    arr = vecSerial;
     }
 
     while(l <= lm && m <= r){
-	if(arr[l] <= arr[m]){
-	    temp[i] = arr[l];
-	    i++;
-	    l++;
-	}
-	else{
-	    temp[i]=arr[m];
-	    i++;
-	    m++;
-	}
+	    if(arr[l] <= arr[m]){
+	        temp[i] = arr[l];
+	        i++;
+	        l++;
+	    }
+	    else{
+	        temp[i]=arr[m];
+	        i++;
+	        m++;
+	    }
     }
     while(l <= lm){
-	temp[i] = arr[l];
-	l++;
-	i++;
+	    temp[i] = arr[l];
+	    l++;
+	    i++;
     }
     while(m <= r){
-	temp[i] = arr[m];
-	m++;
-	i++;
+	    temp[i] = arr[m];
+	    m++;
+	    i++;
     }
     int k;
     for(k=lsaved; k<= r; k++){
-	arr[k] = temp[k];
+	    arr[k] = temp[k];
     }
-    if(p_s==1){
-	memcpy(vecParallel, arr, arraySize);
-    }
-    else{
-	memcpy(vecSerial, arr, arraySize);
+    if(p_s==0){
+	    memcpy(vecSerial, arr, arraySize);
     }
     return;
 
@@ -149,7 +155,6 @@ void merge(int l, int lm, int m, int r, int p_s, int copy_value){
 void barrier(){
     pthread_mutex_lock(lock);
     count++;
-    printf("count: %d \n", count);
     if(count==threadCount){
 	count=0;
 	pthread_cond_broadcast(&c_v);
@@ -159,7 +164,7 @@ void barrier(){
     }
     pthread_mutex_unlock(lock);
     return;
-}
+}/*Barrier*/
 
 int binarySearch(int first, int last, int item) {
     if (last <= first) {
@@ -178,7 +183,9 @@ int binarySearch(int first, int last, int item) {
     } else {
         return binarySearch(first, mid - 1, item);
     }
-}
+}/*binarySearch*/
+
+
 void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank) {
     if(thread_group == 1) {
 	    merge(first, lmid - 1, mid, last, 1, copy_value);
@@ -194,7 +201,7 @@ void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy
 	        mergeRec((x_mid + 1), lmid, (y_mid + 1), last, (thread_group / 2), (x_mid + y_mid), midThread + 1, lastThread, myRank);
 	    }
     }
-}
+}/*mergeRec*/
 
 
 

@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
     (double) (tv2.tv_sec - tv1.tv_sec);
     
     //TODO check that sorted lists match (that parallel sorted correctly)
-  
+
     // Print results.
     printf("Serial time = %e\n", serialTime);
     printf("Parallel time = %e\n", parallelTime);
