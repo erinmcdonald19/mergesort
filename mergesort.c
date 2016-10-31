@@ -22,7 +22,7 @@ void mergeSortSerial(int l, int r, int parallel_subsort);
 /* Global constants */
 const int MAX_THREADS = 64;
 
-/* Global variables */
+/* Global variables  */
 int threadCount, arraySize, count;
 pthread_mutex_t * lock;
 pthread_cond_t c_v;
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
         pthread_create(&thread_handles[thread], NULL,
                        mergeSortParallel, (void*) thread);
     }
-    mergeSortParallel(0); 
+    mergeSortParallel(0);
     
     // Wait for all threads to finish.
     for (thread = 1; thread < threadCount; thread++) {

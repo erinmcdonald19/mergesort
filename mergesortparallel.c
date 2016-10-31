@@ -47,7 +47,13 @@ void mergeSortParallel(void* rank) {
      
     // Get rank of this thread.
     long myRank = (long) rank;  /* Use long in case of 64-bit system */
-    
+
+    //testing barrier
+    printf("Here 1 \n");
+    barrier();
+    printf("Here 2 \n");
+
+
     long myFirsti, myLasti;
     int i;
     getIndices(myRank, &myFirsti, &myLasti);
@@ -146,8 +152,6 @@ void merge(int l, int lm, int m, int r, int p_s, int copy_value){
         for (k = lsaved; k <= r; k++) {
             arr[k] = temp[k];
         }
-    }
-    if(p_s==0){
 	    memcpy(vecSerial, arr, arraySize);
     }
     return;
