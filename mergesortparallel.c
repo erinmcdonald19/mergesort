@@ -49,9 +49,9 @@ void mergeSortParallel(void* rank) {
     long myRank = (long) rank;  /* Use long in case of 64-bit system */
 
     //testing barrier
-    printf("Here 1 \n");
+    //printf("Here 1 \n");
     barrier();
-    printf("Here 2 \n");
+    //printf("Here 2 \n");
 
 
     long myFirsti, myLasti;
@@ -67,6 +67,7 @@ void mergeSortParallel(void* rank) {
     int divisor = 2;
     int difference = 1;
     long firstThread, lastThread, midThread; //first and last thread in group
+    int teller = 1;
 
     while (difference < threadCount) {
 
@@ -76,7 +77,7 @@ void mergeSortParallel(void* rank) {
 
         barrier();
 	    mergeRec(firstIndices[firstThread], lastIndices[firstThread], firstIndices[midThread], lastIndices[lastThread], \
-                divisor, firstIndices[midThread], firstThread, lastThread, myRank, 1);
+                divisor, firstIndices[midThread], firstThread, lastThread, myRank, teller);
         barrier();
 
         divisor *= 2;
@@ -84,6 +85,7 @@ void mergeSortParallel(void* rank) {
         for(i = myFirsti; i <= myLasti; i++) {
             vecParallel[i] = temp[i];
         }
+        teller = 0;
     }
 
     if(rank ==0){
