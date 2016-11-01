@@ -16,7 +16,7 @@ extern void mergeSortSerial(int l, int r, int parallel_subsort);
 void merge(int l, int lm, int m, int r, int p_s, int copy_value);
 void getIndices(long rank, long * first, long * last);
 void barrier();
-void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank, int f);
+void mergeRec(long first, long lmid, long mid, long last, int thread_group, long copy_value, long firstThread, long lastThread, long myRank);
 
 /* Global variables */
 extern int threadCount, arraySize, count;
@@ -67,25 +67,17 @@ void mergeSortParallel(void* rank) {
     int divisor = 2;
     int difference = 1;
     long firstThread, lastThread, midThread; //first and last thread in group
-    int teller = 1;
-
-    if(myRank == 0){
-        for(int e = 0; e < threadCount; e++) {
-            printf("First index of Rank %d: %lu\n", e, firstIndices[e]);
-            printf("Last index of Rank %d: %lu\n", e, lastIndices[e]);
-        }
-    }
 
 
     while (difference < threadCount) {
 
         firstThread = (myRank - (myRank % divisor));
         lastThread = (firstThread + divisor - 1);
-        midThread = (lastThread + firstThread) / 2;
+        midThread = ((lastThread + firstThread) / 2) + 1;
 
         barrier();
 	    mergeRec(firstIndices[firstThread], lastIndices[firstThread], firstIndices[midThread], lastIndices[lastThread], \
-                divisor, firstIndices[midThread], firstThread, lastThread, myRank, teller);
+                divisor, firstIndices[midThread], firstThread, lastThread, myRank);
         barrier();
 
         divisor *= 2;
@@ -93,12 +85,11 @@ void mergeSortParallel(void* rank) {
         for(i = myFirsti; i <= myLasti; i++) {
             vecParallel[i] = temp[i];
         }
-        teller = 0;
     }
 
     if(rank ==0){
 	    int j;
-    	printf("Partially sorted: \n");
+    	printf("\"Parallel Sorted\": \n");
     	for(j=0; j<arraySize; j++){
 		printf("%d \n", vecParallel[j]);
    	 }
@@ -202,30 +193,36 @@ int binarySearch(int first, int last, int item) {
 }/*binarySearch*/
 
 
-void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank, int f) {
+void mergeRec(long first, long lmid, long mid, long last, int thread_group, long copy_value, long firstThread, long lastThread, long myRank) {
 
 
     if(thread_group == 1) {
 	    merge(first, lmid, mid, last, 1, copy_value);
     }
     else {
-	    int x_mid = ((first + lmid) / 2);
-	    int y_mid = binarySearch(mid, last, vecParallel[x_mid]);
-	    int midThread = ((lastThread + firstThread) / 2) + 1;
+	    long x_mid = ((first + lmid) / 2) + 1;
+	    long y_mid = binarySearch(mid, last, vecParallel[x_mid]);
+	    if(y_mid > lastIndices[threadCount - 1]) {
+		y_mid--;
+	    }
+	    long midThread = ((lastThread + firstThread) / 2) + 1;
 
-        if(myRank < midThread && f == 1){
-            printf("Thread Group = %d\nFirst thread is %d and last thread is %d and middle thread is %d\n", thread_group, firstThread, lastThread, midThread);
-            printf("I'm going to the left and my rank is %lu and my bounds are %d, %d, and %d, %d\n",myRank, first, x_mid, mid, y_mid - 1);
-        }
-        else if(f == 1){
-            printf("Thread Group = %d\nFirst thread is %d and last thread is %d and middle thread is %d\n", thread_group, firstThread, lastThread, midThread);
-            printf("I'm going to the right and my rank is %lu and my bounds are %d, %d, and %d, %d\n",myRank, (x_mid + 1), lmid, y_mid, last);
-        }
+
+//printing out values for debugging
         if(myRank < midThread){
-    	    mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), first, firstThread, midThread - 1, myRank, 0);
+            printf("\nThread Group = %d\nFirst thread is %lu and last thread is %lu and middle thread is %lu\nI'm going to the left and my rank is %lu and my bounds are %lu, %lu, and %lu, %lu, y_mid is %lu\n\n", thread_group, firstThread, lastThread, midThread, myRank, first, x_mid - 1, mid, y_mid, y_mid);
+        }
+        else {
+            printf("\nThread Group = %d\nFirst thread is %lu and last thread is %lu and middle thread is %lu\nI'm going to the right and my rank is %lu and my bounds are %lu, %lu, and %lu, %lu, y_mid is %lu\n\n", thread_group, firstThread, lastThread, midThread, myRank, x_mid, lmid, y_mid + 1, last, y_mid);
+        }
+
+	printf("right side copy value is: %lu\n", (((x_mid - first) + (y_mid - mid)) + 1));
+
+        if(myRank < midThread){
+    	    mergeRec(first, x_mid - 1, mid, y_mid, (thread_group / 2), first, firstThread, midThread - 1, myRank);
 	    }
 	    else {
-	        mergeRec((x_mid + 1), lmid, y_mid, last, (thread_group / 2), (((x_mid - first) + (y_mid - mid)) + 1), midThread, lastThread, myRank, 0);
+	        mergeRec(x_mid, lmid, y_mid + 1, last, (thread_group / 2), (((x_mid - first) + (y_mid - mid)) + 1), midThread, lastThread, myRank);
 	    }
     }
     return;
