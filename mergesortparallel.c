@@ -174,17 +174,10 @@ void barrier(){
 }/*Barrier*/
 
 int binarySearch(int first, int last, int item) {
-    if (last <= first) {
-        if (item > vecParallel[first]) {
-            return first + 1;
-        } else {
-            return first;
-        }
+    if (last < first) {
+        return first;
     }
     int mid = (first + last) / 2;
-    if (item == vecParallel[mid]) {
-        return mid + 1;
-    }
     if (item > vecParallel[mid]) {
         return binarySearch(mid + 1, last, item);
     } else {
@@ -201,10 +194,7 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
     }
     else {
 	    long x_mid = ((first + lmid) / 2);
-	    long y_mid = binarySearch(mid, last, vecParallel[x_mid]);
-	    if(y_mid > lastIndices[threadCount - 1]) {
-		y_mid--;
-	    }
+	    long y_mid = binarySearch(mid, last, vecParallel[x_mid + 1]);
 	    long midThread = ((lastThread + firstThread) / 2) + 1;
 
 
@@ -219,10 +209,10 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
 	printf("right side copy value is: %lu\n", (((x_mid - first) + (y_mid - mid)) + 1));
 
         if(myRank < midThread){
-    	    mergeRec(first, x_mid - 1, mid, y_mid - 1, (thread_group / 2), first, firstThread, midThread - 1, myRank);
+    	    mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), first, firstThread, midThread - 1, myRank);
 	    }
 	    else {
-	        mergeRec(x_mid, lmid, y_mid, last, (thread_group / 2), (((x_mid - first) + (y_mid - mid)) + 1), midThread, lastThread, myRank);
+	        mergeRec(x_mid + 1, lmid, y_mid, last, (thread_group / 2), (((x_mid - first) + (y_mid - mid)) + 1), midThread, lastThread, myRank);
 	    }
     }
     return;
