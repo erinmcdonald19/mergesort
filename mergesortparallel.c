@@ -197,7 +197,7 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
 	    long y_mid = binarySearch(mid, last, vecParallel[x_mid + 1]);
 	    long midThread = ((lastThread + firstThread) / 2) + 1;
 
-
+//lol
 //printing out values for debugging
         if(myRank < midThread){
             printf("\nThread Group = %d\nFirst thread is %lu and last thread is %lu and middle thread is %lu\nI'm going to the left and my rank is %lu and my bounds are %lu, %lu, and %lu, %lu, y_mid is %lu\n\n", thread_group, firstThread, lastThread, midThread, myRank, first, x_mid - 1, mid, y_mid - 1, y_mid);
