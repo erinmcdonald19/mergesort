@@ -16,7 +16,7 @@ extern void mergeSortSerial(int l, int r, int parallel_subsort);
 void merge(int l, int lm, int m, int r, int p_s, int copy_value);
 void getIndices(long rank, long * first, long * last);
 void barrier();
-void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank);
+void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank, int f);
 
 /* Global variables */
 extern int threadCount, arraySize, count;
