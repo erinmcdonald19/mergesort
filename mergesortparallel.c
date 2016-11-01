@@ -71,8 +71,8 @@ void mergeSortParallel(void* rank) {
 
     if(myRank == 0){
         for(int e = 0; e < threadCount; e++) {
-            printf("First index of Rank %d: %d", e, firstIndices[e]);
-            printf("Last index of Rank %d: %d", e, lastIndices[e]);
+            printf("First index of Rank %d: %lu\n", e, firstIndices[e]);
+            printf("Last index of Rank %d: %lu\n", e, lastIndices[e]);
         }
     }
 
