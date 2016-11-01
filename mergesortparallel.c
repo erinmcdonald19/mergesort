@@ -211,7 +211,7 @@ void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy
     else {
 	    int x_mid = ((first + lmid) / 2);
 	    int y_mid = binarySearch(mid, last, vecParallel[x_mid]);
-	    int midThread = (lastThread + firstThread) / 2;
+	    int midThread = ((lastThread + firstThread) / 2) + 1;
 
         if(myRank < midThread && f == 1){
             printf("I'm going to the left and my rank is %lu and my bounds are %d, %d, and %d, %d\n",myRank, first, x_mid, mid, y_mid - 1);
