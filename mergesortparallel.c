@@ -203,10 +203,10 @@ void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy
 	    int y_mid = binarySearch(mid, last, vecParallel[x_mid]);
 	    int midThread = (lastThread + firstThread) / 2;
         if(myRank < midThread && f == 1){
-            printf("I'm going to the left and my rank is %lu and my bounds are %d, %d, and %d, %d",myRank, first, x_mid, mid, y_mid - 1);
+            printf("I'm going to the left and my rank is %lu and my bounds are %d, %d, and %d, %d\n",myRank, first, x_mid, mid, y_mid - 1);
         }
         else if(f == 1){
-            printf("I'm going to the right and my rank is %lu and my bounds are %d, %d, and %d, %d",myRank, (x_mid + 1), lmid, y_mid, last);
+            printf("I'm going to the right and my rank is %lu and my bounds are %d, %d, and %d, %d\n",myRank, (x_mid + 1), lmid, y_mid, last);
         }
         if(myRank < midThread){
     	    mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), first, firstThread, midThread - 1, myRank, 0);
