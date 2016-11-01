@@ -192,7 +192,7 @@ int binarySearch(int first, int last, int item) {
 }/*binarySearch*/
 
 
-void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank) {
+void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy_value, int firstThread, int lastThread, long myRank, int f) {
 
 
     if(thread_group == 1) {
@@ -202,6 +202,12 @@ void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy
 	    int x_mid = ((first + lmid) / 2);
 	    int y_mid = binarySearch(mid, last, vecParallel[x_mid]);
 	    int midThread = (lastThread + firstThread) / 2;
+        if(myRank < midThread && f == 1){
+            printf("I'm going to the left and my rank is %lu and my bounds are %d, %d, and %d, %d",myRank, first, x_mid, mid, y_mid - 1);
+        }
+        else if(f == 1){
+            printf("I'm going to the right and my rank is %lu and my bounds are %d, %d, and %d, %d",myRank, (x_mid + 1), lmid, y_mid, last);
+        }
         if(myRank < midThread){
     	    mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), first, firstThread, midThread - 1, myRank);
 	    }
