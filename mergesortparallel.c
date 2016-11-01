@@ -76,7 +76,7 @@ void mergeSortParallel(void* rank) {
 
         barrier();
 	    mergeRec(firstIndices[firstThread], lastIndices[firstThread], firstIndices[midThread], lastIndices[lastThread], \
-                divisor, firstIndices[midThread], firstThread, lastThread, myRank);
+                divisor, firstIndices[midThread], firstThread, lastThread, myRank, 1);
         barrier();
 
         divisor *= 2;
@@ -209,10 +209,10 @@ void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy
             printf("I'm going to the right and my rank is %lu and my bounds are %d, %d, and %d, %d",myRank, (x_mid + 1), lmid, y_mid, last);
         }
         if(myRank < midThread){
-    	    mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), first, firstThread, midThread - 1, myRank);
+    	    mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), first, firstThread, midThread - 1, myRank, 0);
 	    }
 	    else {
-	        mergeRec((x_mid + 1), lmid, y_mid, last, (thread_group / 2), (((x_mid - first) + (y_mid - mid)) + 1), midThread, lastThread, myRank);
+	        mergeRec((x_mid + 1), lmid, y_mid, last, (thread_group / 2), (((x_mid - first) + (y_mid - mid)) + 1), midThread, lastThread, myRank, 0);
 	    }
     }
     return;
