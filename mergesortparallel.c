@@ -69,6 +69,14 @@ void mergeSortParallel(void* rank) {
     long firstThread, lastThread, midThread; //first and last thread in group
     int teller = 1;
 
+    if(myRank == 0){
+        for(int e = 0; e < threadCount; e++) {
+            printf("First index of Rank %d: %d", e, firstIndices[e]);
+            printf("Last index of Rank %d: %d", e, lastIndices[e]);
+        }
+    }
+
+
     while (difference < threadCount) {
 
         firstThread = (myRank - (myRank % divisor));
@@ -204,10 +212,12 @@ void mergeRec(int first, int lmid, int mid, int last, int thread_group, int copy
 	    int x_mid = ((first + lmid) / 2);
 	    int y_mid = binarySearch(mid, last, vecParallel[x_mid]);
 	    int midThread = (lastThread + firstThread) / 2;
+
         if(myRank < midThread && f == 1){
             printf("I'm going to the left and my rank is %lu and my bounds are %d, %d, and %d, %d\n",myRank, first, x_mid, mid, y_mid - 1);
         }
         else if(f == 1){
+            printf("Thread Group = %d\n first thread is %lu and last thread is %lu\n", thread_group, firstThread, lastThread);
             printf("I'm going to the right and my rank is %lu and my bounds are %d, %d, and %d, %d\n",myRank, (x_mid + 1), lmid, y_mid, last);
         }
         if(myRank < midThread){
