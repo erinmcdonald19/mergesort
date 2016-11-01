@@ -200,7 +200,7 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
 	    merge(first, lmid, mid, last, 1, copy_value);
     }
     else {
-	    long x_mid = ((first + lmid) / 2) + 1;
+	    long x_mid = ((first + lmid) / 2);
 	    long y_mid = binarySearch(mid, last, vecParallel[x_mid]);
 	    if(y_mid > lastIndices[threadCount - 1]) {
 		y_mid--;
@@ -210,19 +210,19 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
 
 //printing out values for debugging
         if(myRank < midThread){
-            printf("\nThread Group = %d\nFirst thread is %lu and last thread is %lu and middle thread is %lu\nI'm going to the left and my rank is %lu and my bounds are %lu, %lu, and %lu, %lu, y_mid is %lu\n\n", thread_group, firstThread, lastThread, midThread, myRank, first, x_mid - 1, mid, y_mid, y_mid);
+            printf("\nThread Group = %d\nFirst thread is %lu and last thread is %lu and middle thread is %lu\nI'm going to the left and my rank is %lu and my bounds are %lu, %lu, and %lu, %lu, y_mid is %lu\n\n", thread_group, firstThread, lastThread, midThread, myRank, first, x_mid - 1, mid, y_mid - 1, y_mid);
         }
         else {
-            printf("\nThread Group = %d\nFirst thread is %lu and last thread is %lu and middle thread is %lu\nI'm going to the right and my rank is %lu and my bounds are %lu, %lu, and %lu, %lu, y_mid is %lu\n\n", thread_group, firstThread, lastThread, midThread, myRank, x_mid, lmid, y_mid + 1, last, y_mid);
+            printf("\nThread Group = %d\nFirst thread is %lu and last thread is %lu and middle thread is %lu\nI'm going to the right and my rank is %lu and my bounds are %lu, %lu, and %lu, %lu, y_mid is %lu\n\n", thread_group, firstThread, lastThread, midThread, myRank, x_mid, lmid, y_mid, last, y_mid);
         }
 
 	printf("right side copy value is: %lu\n", (((x_mid - first) + (y_mid - mid)) + 1));
 
         if(myRank < midThread){
-    	    mergeRec(first, x_mid - 1, mid, y_mid, (thread_group / 2), first, firstThread, midThread - 1, myRank);
+    	    mergeRec(first, x_mid - 1, mid, y_mid - 1, (thread_group / 2), first, firstThread, midThread - 1, myRank);
 	    }
 	    else {
-	        mergeRec(x_mid, lmid, y_mid + 1, last, (thread_group / 2), (((x_mid - first) + (y_mid - mid)) + 1), midThread, lastThread, myRank);
+	        mergeRec(x_mid, lmid, y_mid, last, (thread_group / 2), (((x_mid - first) + (y_mid - mid)) + 1), midThread, lastThread, myRank);
 	    }
     }
     return;
