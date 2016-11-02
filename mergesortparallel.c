@@ -115,27 +115,7 @@ void merge(int l, int lm, int m, int r, int * arr, int copy_value){
     int lsaved=l;
     int i;
     i = copy_value;
-   /*
-    //running serially
-    if(arr == vecSerial) {
-        if(m>0) {
-            lm = m - 1;
-        }
-        else{
-            lm = 0;
-        }
-    }
- 
-    i = copy_value; /* takes in to account for "right" thread merges that have variable starting copy indices due to the variability of the length of the "left" string's merge after the binary search. For anything other than the "right" thread, copy_value = l, though the right thread could have a copy_value equal to l 
 
-    int * arr;
-    if(p_s==1){
-	    arr = vecParallel;
-    }
-    else{
-	    arr = vecSerial;
-    }
-*/
     while(l <= lm && m <= r){
 	    if(arr[l] <= arr[m]){
 	        temp[i] = arr[l];
@@ -158,14 +138,7 @@ void merge(int l, int lm, int m, int r, int * arr, int copy_value){
 	    m++;
 	    i++;
     }
-    /*
-    int k;
-    if(p_s == 0) {
-    	for (k = lsaved; k <= r; k++) {
-            arr[k] = temp[k];
-    	}
-    }
-    */
+
     return;
 
 } /* merge */
@@ -201,7 +174,7 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
 
 
     if(thread_group == 1) {
-	    merge(first, lmid, mid, last, 1, copy_value);
+	    merge(first, lmid, mid, last, vecParallel, copy_value);
     }
     else {
         printf("mid is %d, last is %d\n", mid, last);
