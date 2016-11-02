@@ -196,6 +196,8 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
 	    merge(first, lmid, mid, last, 1, copy_value);
     }
     else {
+        printf("mid is %d, last is %d\n", mid, last);
+
 	    long x_mid = ((first + lmid) / 2);
 	    long y_mid = binarySearch(mid, last, vecParallel[x_mid + 1]);
 	    long midThread = ((lastThread + firstThread) / 2) + 1;
