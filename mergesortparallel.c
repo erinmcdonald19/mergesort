@@ -48,7 +48,7 @@ void mergeSortParallel(void* rank) {
     // Get rank of this thread.
     long myRank = (long) rank;  /* Use long in case of 64-bit system */
 
-    //testing barrier
+    //testing
     //printf("Here 1 \n");
     barrier();
     //printf("Here 2 \n");
