@@ -207,7 +207,7 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
         }
 
 	printf("right side copy value is: %lu\n", (((x_mid - first) + (y_mid - mid)) + 1));
-
+//x_mid is the last of X1 and y_mid is the first of Y2
         if(myRank < midThread){
     	    mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), copy_value, firstThread, midThread - 1, myRank);
 	    }
