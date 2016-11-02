@@ -62,6 +62,9 @@ void mergeSortParallel(void* rank) {
     
     //sort assigned subarray
     mergeSortSerial(myFirsti, myLasti, 1);
+    for(i = myFirsti; i <= myLasti; i++) {
+        vecParallel[i] = temp[i];
+    }
     barrier();
    //tree based reduction
     int divisor = 2;
