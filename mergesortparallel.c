@@ -66,6 +66,13 @@ void mergeSortParallel(void* rank) {
         vecParallel[i] = temp[i];
     }
     barrier();
+    if(rank ==0) {
+        int j;
+        printf("\"Partially sorted\": \n");
+        for (j = 0; j < arraySize; j++) {
+            printf("%d \n", vecParallel[j]);
+        }
+    }
    //tree based reduction
     int divisor = 2;
     int difference = 1;
@@ -95,7 +102,7 @@ void mergeSortParallel(void* rank) {
     	printf("\"Parallel Sorted\": \n");
     	for(j=0; j<arraySize; j++){
 		printf("%d \n", vecParallel[j]);
-   	 }
+   	    }
     }
     
     
