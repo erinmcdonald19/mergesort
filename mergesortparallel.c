@@ -12,8 +12,8 @@
 
 /* Function Declarations */
 void mergeSortParallel(void* rank);
-extern void mergeSortSerial(int l, int r, int parallel_subsort);
-void merge(int l, int lm, int m, int r, int p_s, int copy_value);
+extern void mergeSortSerial(int l, int r, int * arr);
+void merge(int l, int lm, int m, int r, int * arr, int copy_value);
 void getIndices(long rank, long * first, long * last);
 void barrier();
 void mergeRec(long first, long lmid, long mid, long last, int thread_group, long copy_value, long firstThread, long lastThread, long myRank);
@@ -61,7 +61,7 @@ void mergeSortParallel(void* rank) {
     lastIndices[myRank] = myLasti;
     
     //sort assigned subarray
-    mergeSortSerial(myFirsti, myLasti, 1);
+    mergeSortSerial(myFirsti, myLasti, vecParallel);
     barrier();
     for(i = myFirsti; i <= myLasti; i++) {
         vecParallel[i] = temp[i];
@@ -111,11 +111,13 @@ void mergeSortParallel(void* rank) {
 }/* mergeSortParallel */
 
 
-void merge(int l, int lm, int m, int r, int p_s, int copy_value){
+void merge(int l, int lm, int m, int r, int * arr, int copy_value){
     int lsaved=l;
     int i;
+    i = copy_value;
+   /*
     //running serially
-    if(p_s == 0) {
+    if(arr == vecSerial) {
         if(m>0) {
             lm = m - 1;
         }
@@ -123,7 +125,7 @@ void merge(int l, int lm, int m, int r, int p_s, int copy_value){
             lm = 0;
         }
     }
-
+ 
     i = copy_value; // takes in to account for "right" thread merges that have variable starting copy indices due to
                     // the variability of the length of the "left" string's merge after the binary search. For anything
                     // other than the "right" thread, copy_value = l, though the right thread could have a copy_value
@@ -136,7 +138,7 @@ void merge(int l, int lm, int m, int r, int p_s, int copy_value){
     else{
 	    arr = vecSerial;
     }
-
+*/
     while(l <= lm && m <= r){
 	    if(arr[l] <= arr[m]){
 	        temp[i] = arr[l];
@@ -159,13 +161,14 @@ void merge(int l, int lm, int m, int r, int p_s, int copy_value){
 	    m++;
 	    i++;
     }
+    /*
     int k;
     if(p_s == 0) {
-        for (k = lsaved; k <= r; k++) {
+    	for (k = lsaved; k <= r; k++) {
             arr[k] = temp[k];
-        }
-	    memcpy(vecSerial, arr, arraySize);
+    	}
     }
+    */
     return;
 
 } /* merge */

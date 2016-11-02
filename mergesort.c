@@ -17,7 +17,7 @@
 
 /* Function declarations */
 void usage(char* prog_name);
-void mergeSortSerial(int l, int r, int parallel_subsort);
+void mergeSortSerial(int l, int r, int * arr);
 
 /* Global constants */
 const int MAX_THREADS = 64;
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
   
     // Compute sum with serial code
     gettimeofday(&tv1, NULL); // start timing
-    mergeSortSerial(0, arraySize-1,0);
+    mergeSortSerial(0, arraySize-1, vecSerial);
     printf("Serially sorted: \n");
     for(i=0; i<arraySize; i++){
 	printf("%d \n", vecSerial[i]);
@@ -127,13 +127,13 @@ int main(int argc, char* argv[]) {
     return 0;
 }  /* main */
 
-void mergeSortSerial(int l, int r, int parallel_subsort){
+void mergeSortSerial(int l, int r, int * arr){
     int m;
     if(r>l){
 	m=(r+l)/2 +1;
-	mergeSortSerial(l, m-1, parallel_subsort);
-	mergeSortSerial(m,r, parallel_subsort);
-	merge(l,m,m,r, parallel_subsort, l);
+	mergeSortSerial(l, m-1, arr);
+	mergeSortSerial(m,r, arr);
+	merge(l,m,m,r, arr, l);
     }
     return;
 } /* mergeSortSerial */ 
