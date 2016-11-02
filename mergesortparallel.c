@@ -209,10 +209,10 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
 	printf("right side copy value is: %lu\n", (((x_mid - first) + (y_mid - mid)) + 1));
 
         if(myRank < midThread){
-    	    mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), first, firstThread, midThread - 1, myRank);
+    	    mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), copy_value, firstThread, midThread - 1, myRank);
 	    }
 	    else {
-	        mergeRec(x_mid + 1, lmid, y_mid, last, (thread_group / 2), (((x_mid - first) + (y_mid - mid)) + 1), midThread, lastThread, myRank);
+	        mergeRec(x_mid + 1, lmid, y_mid, last, (thread_group / 2), (copy_value + (((x_mid - first) + 1) + (y_mid - mid))), midThread, lastThread, myRank);
 	    }
     }
     return;
