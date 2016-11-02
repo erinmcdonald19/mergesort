@@ -139,6 +139,12 @@ void merge(int l, int lm, int m, int r, int * arr, int copy_value){
 	    i++;
     }
 
+    if(arr == vecSerial){
+    	int k;
+    	for (k = lsaved; k <= r; k++) {
+            arr[k] = temp[k];
+    	}
+    }
     return;
 
 } /* merge */

@@ -133,11 +133,9 @@ void mergeSortSerial(int l, int r, int * arr){
 	m=(r+l)/2 +1;
 	mergeSortSerial(l, m-1, arr);
 	mergeSortSerial(m,r, arr);
-	merge(l,m,m,r, arr, l);
+	merge(l,m-1,m,r, arr, l);
     }
-    else{
-	memcpy(vecSerial, temp, arraySize);
-    }
+
     return;
 } /* mergeSortSerial */ 
 
