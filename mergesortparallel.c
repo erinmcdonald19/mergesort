@@ -62,6 +62,7 @@ void mergeSortParallel(void* rank) {
     
     //sort assigned subarray
     mergeSortSerial(myFirsti, myLasti, 1);
+    barrier();
     for(i = myFirsti; i <= myLasti; i++) {
         vecParallel[i] = temp[i];
     }
