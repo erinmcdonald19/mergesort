@@ -126,10 +126,7 @@ void merge(int l, int lm, int m, int r, int * arr, int copy_value){
         }
     }
  
-    i = copy_value; // takes in to account for "right" thread merges that have variable starting copy indices due to
-                    // the variability of the length of the "left" string's merge after the binary search. For anything
-                    // other than the "right" thread, copy_value = l, though the right thread could have a copy_value
-                    // equal to l
+    i = copy_value; /* takes in to account for "right" thread merges that have variable starting copy indices due to the variability of the length of the "left" string's merge after the binary search. For anything other than the "right" thread, copy_value = l, though the right thread could have a copy_value equal to l 
 
     int * arr;
     if(p_s==1){
