@@ -139,15 +139,15 @@ void merge(int l, int lm, int m, int r, int * arr, int copy_value){
 	    i++;
     }
 
-    if(arr == vecSerial){
-    	int k;
-    	for (k = lsaved; k <= r; k++) {
-            arr[k] = temp[k];
-    	}
+    //okay so if we check that arr is vec parallel then the serial sort on the pieces of the parallel doesn't work and if we dont put a conditional around it then it's copying back during the recursive merge which isn't okay. but also, that is for sure not the only prob because i checked by making another merge function which was exactly the same except without the copying back and serial and partially sorted worked then i called the merge that didn't copy back in the base case of the recursive function and the parallel sort still didn't work. So basically this is for sure a problem but also for sure not the only problem
+    int k;
+    for (k = lsaved; k <= r; k++) {
+        arr[k] = temp[k];
     }
     return;
 
 } /* merge */
+
 
 void barrier(){
     pthread_mutex_lock(lock);
