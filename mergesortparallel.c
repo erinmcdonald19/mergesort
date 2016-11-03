@@ -50,9 +50,9 @@ void mergeSortParallel(void* rank) {
     long myRank = (long) rank;  /* Use long in case of 64-bit system */
 
     //testing
-    //printf("Here 1 \n");
+    printf("Here 1 \n");
     barrier();
-    //printf("Here 2 \n");
+    printf("Here 2 \n");
 
 
     long myFirsti, myLasti;
@@ -89,24 +89,25 @@ void mergeSortParallel(void* rank) {
         midThread = ((lastThread + firstThread) / 2) + 1;
 
         barrier();
-	mergeRec(firstIndices[firstThread], firstIndices[midThread] - 1, firstIndices[midThread], lastIndices[lastThread], \
+	    mergeRec(firstIndices[firstThread], firstIndices[midThread] - 1, firstIndices[midThread], lastIndices[lastThread], \
                 divisor, firstIndices[firstThread], firstThread, lastThread, myRank);
-        barrier();
+            barrier();
 
-        divisor *= 2;
-        difference *= 2;
-        for(i = myFirsti; i <= myLasti; i++) {
-            vecParallel[i] = temp[i];
+            divisor *= 2;
+            difference *= 2;
+            for(i = myFirsti; i <= myLasti; i++) {
+                vecParallel[i] = temp[i];
+            }
         }
-    }
+        barrier();
+        if(rank ==0){
+	        int j;
+    	    printf("\"Parallel Sorted\": \n");
+    	    for(j=0; j<arraySize; j++){
+		    printf("%d \n", vecParallel[j]);
+            }
 
-    if(rank ==0){
-	    int j;
-    	printf("\"Parallel Sorted\": \n");
-    	for(j=0; j<arraySize; j++){
-		printf("%d \n", vecParallel[j]);
-   	    }
-    }
+        }
     
     
     return;
