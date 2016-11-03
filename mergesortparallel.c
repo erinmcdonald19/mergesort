@@ -14,6 +14,7 @@
 void mergeSortParallel(void* rank);
 extern void mergeSortSerial(int l, int r, int * arr);
 void merge(int l, int lm, int m, int r, int * arr, int copy_value);
+void merge2(int l, int lm, int m, int r, int * arr, int copy_value);
 void getIndices(long rank, long * first, long * last);
 void barrier();
 void mergeRec(long first, long lmid, long mid, long last, int thread_group, long copy_value, long firstThread, long lastThread, long myRank);
@@ -67,6 +68,7 @@ void mergeSortParallel(void* rank) {
         vecParallel[i] = temp[i];
     }
     barrier();
+   
     if(rank ==0) {
         int j;
         printf("\"Partially sorted\": \n");
@@ -87,8 +89,8 @@ void mergeSortParallel(void* rank) {
         midThread = ((lastThread + firstThread) / 2) + 1;
 
         barrier();
-	    mergeRec(firstIndices[firstThread], lastIndices[firstThread], firstIndices[midThread], lastIndices[lastThread], \
-                divisor, firstIndices[midThread], firstThread, lastThread, myRank);
+	mergeRec(firstIndices[firstThread], firstIndices[midThread] - 1, firstIndices[midThread], lastIndices[lastThread], \
+                divisor, firstIndices[firstThread], firstThread, lastThread, myRank);
         barrier();
 
         divisor *= 2;
@@ -141,12 +143,45 @@ void merge(int l, int lm, int m, int r, int * arr, int copy_value){
 
     //okay so if we check that arr is vec parallel then the serial sort on the pieces of the parallel doesn't work and if we dont put a conditional around it then it's copying back during the recursive merge which isn't okay. but also, that is for sure not the only prob because i checked by making another merge function which was exactly the same except without the copying back and serial and partially sorted worked then i called the merge that didn't copy back in the base case of the recursive function and the parallel sort still didn't work. So basically this is for sure a problem but also for sure not the only problem
     int k;
-    for (k = lsaved; k <= r; k++) {
+    for (k = copy_value; k <= r; k++) {
         arr[k] = temp[k];
     }
     return;
 
 } /* merge */
+
+
+void merge2(int l, int lm, int m, int r, int * arr, int copy_value){
+    int lsaved=l;
+    int i;
+    i = copy_value;
+
+    while(l <= lm && m <= r){
+	    if(arr[l] <= arr[m]){
+	        temp[i] = arr[l];
+	        i++;
+	        l++;
+	    }
+	    else{
+	        temp[i]=arr[m];
+	        i++;
+	        m++;
+	    }
+    }
+    while(l <= lm){
+	    temp[i] = arr[l];
+	    l++;
+	    i++;
+    }
+    while(m <= r){
+	    temp[i] = arr[m];
+	    m++;
+	    i++;
+    }
+
+    return;
+
+} /* merge 2 */
 
 
 void barrier(){
@@ -180,7 +215,7 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
 
 
     if(thread_group == 1) {
-	    merge(first, lmid, mid, last, vecParallel, copy_value);
+	    merge2(first, lmid, mid, last, vecParallel, copy_value);
     }
     else {
         printf("mid is %d, last is %d\n", mid, last);
