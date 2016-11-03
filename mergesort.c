@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
     int val,i;
     // Fill array with random numbers
     printf("Unsorted: \n");
-    srand(2);
+    srand(time(NULL));
     for(i = 0; i < arraySize; i++){
         val = rand() %10;
         vecSerial[i] = val;
