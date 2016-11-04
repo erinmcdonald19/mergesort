@@ -93,7 +93,10 @@ void mergeSortParallel(void* rank) {
             thread_group = divisor;
         }
 	
-
+	if(rem == threadCount) {
+	    rem = 0;
+	}
+	
         barrier();
 	if(myRank < threadCount - rem) {
 		mergeRec(firstIndices[firstThread], firstIndices[midThread] - 1, firstIndices[midThread], lastIndices[lastThread], \
