@@ -77,19 +77,27 @@ void mergeSortParallel(void* rank) {
     int difference = 1;
     long firstThread, lastThread, midThread; //first and last thread in group
     int rem;
+    int thread_group;
 
 
     while (difference < threadCount) {
-	rem = threadCount % divisor;
+	    rem = threadCount % divisor;
         firstThread = (myRank - (myRank % divisor));
         lastThread = min((firstThread + divisor - 1), (threadCount -1));
         midThread = ((lastThread + firstThread) / 2) + 1;
+
+        if(divisor > threadCount) {
+            thread_group = divisor - (threadCount % divisor);
+        }
+        else {
+            thread_group = divisor;
+        }
 	
 
         barrier();
 	if(myRank < threadCount - rem) {
 		mergeRec(firstIndices[firstThread], firstIndices[midThread] - 1, firstIndices[midThread], lastIndices[lastThread], \
-		        divisor, firstIndices[firstThread], firstThread, lastThread, myRank);
+		        thread_group, firstIndices[firstThread], firstThread, lastThread, myRank);
 	}
         barrier();
 
