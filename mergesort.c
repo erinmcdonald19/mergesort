@@ -50,13 +50,13 @@ int main(int argc, char* argv[]) {
     lastIndices = malloc(sizeof(long)*threadCount);
     int val,i;
     // Fill array with random numbers
-    printf("Unsorted: \n");
+    printf("\n\nUnsorted: \n");
     srand(2);
     for(i = 0; i < arraySize; i++){
         val = rand() %10;
         vecSerial[i] = val;
 	vecParallel[i] = val;
-	printf("%d \n", val);
+	printf("%d |", val);
     }
     
 
@@ -66,9 +66,9 @@ int main(int argc, char* argv[]) {
     // Compute sum with serial code
     gettimeofday(&tv1, NULL); // start timing
     mergeSortSerial(0, arraySize-1, vecSerial);
-    printf("Serially sorted: \n");
+    printf("\n\nSerially sorted: \n");
     for(i=0; i<arraySize; i++){
-	printf("%d \n", vecSerial[i]);
+	printf("%d |", vecSerial[i]);
     }
     gettimeofday(&tv2, NULL); // stop timing
     double serialTime = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
     //TODO check that sorted lists match (that parallel sorted correctly)
 
     // Print results.
-    printf("Serial time = %e\n", serialTime);
+    printf("\n\nSerial time = %e\n", serialTime);
     printf("Parallel time = %e\n", parallelTime);
     double speedup = serialTime / parallelTime;
     double efficiency = speedup / threadCount;

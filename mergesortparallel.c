@@ -81,13 +81,13 @@ void mergeSortParallel(void* rank) {
 
 
     while (difference < threadCount) {
-	    rem = threadCount % divisor;
+	rem = threadCount % divisor;
         firstThread = (myRank - (myRank % divisor));
         lastThread = min((firstThread + divisor - 1), (threadCount -1));
         midThread = ((lastThread + firstThread) / 2) + 1;
 
         if(divisor > threadCount) {
-            thread_group = divisor - (threadCount % divisor);
+            thread_group = divisor - (divisor % threadCount);
         }
         else {
             thread_group = divisor;
@@ -95,12 +95,17 @@ void mergeSortParallel(void* rank) {
 	
 	if(rem == threadCount) {
 	    rem = 0;
+	    if(threadCount % 2 == 0) {
+		midThread = difference;
+	    }
 	}
 	
+
         barrier();
 	if(myRank < threadCount - rem) {
 		mergeRec(firstIndices[firstThread], firstIndices[midThread] - 1, firstIndices[midThread], lastIndices[lastThread], \
 		        thread_group, firstIndices[firstThread], firstThread, lastThread, myRank);
+	
 	}
         barrier();
 
@@ -115,9 +120,9 @@ void mergeSortParallel(void* rank) {
 
     if(rank ==0){
 	    int j;
-    	printf("\"Parallel Sorted\": \n");
+    	printf("\n\n\"Parallel Sorted\": \n");
     	for(j=0; j<arraySize; j++){
-		printf("%d \n", vecParallel[j]);
+		printf("%d |", vecParallel[j]);
    	    }
     }
     
@@ -237,13 +242,14 @@ void mergeRec(long first, long lmid, long mid, long last, int thread_group, long
 	    long x_mid = ((first + lmid) / 2);
 	    long y_mid = binarySearch(mid, last, vecParallel[x_mid + 1]);
 	    long midThread = ((lastThread + firstThread) / 2) + 1;
-
+		printf("\nthread_group is: %d, my rank is %lu, midThread is: %lu\n", thread_group, myRank, midThread);
 //x_mid is the last of X1 and y_mid is the first of Y2
             if(myRank < midThread){
-    	    	mergeRec(first, x_mid, mid, y_mid - 1, (thread_group / 2), copy_value, firstThread, midThread - 1, myRank);
+    	    	mergeRec(first, x_mid, mid, y_mid - 1, ((thread_group % 2) + (thread_group / 2)), copy_value, firstThread, midThread - 1, myRank);
 	    }
 	    else {
-	        mergeRec(x_mid + 1, lmid, y_mid, last, ((thread_group % 2) + (thread_group / 2)), (copy_value + (((x_mid - first) + 1) + (y_mid - mid))), midThread, lastThread, myRank);
+	        mergeRec(x_mid + 1, lmid, y_mid, last, (thread_group / 2), (copy_value + (((x_mid - first) + 1) + (y_mid - mid))), midThread, lastThread, myRank);
+		printf("\nMy rank is %lu and copy_value was %lu\n", myRank, (copy_value + (((x_mid - first) + 1) + (y_mid - mid))));
 	    }
     }
     return;
