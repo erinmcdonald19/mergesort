@@ -98,6 +98,9 @@ void mergeSortParallel(void* rank) {
 	    if(threadCount % 2 == 0) {
 		midThread = difference;
 	    }
+	    else {
+		midThread = //??
+	    }
 	}
 	
 
