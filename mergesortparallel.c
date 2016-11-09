@@ -86,26 +86,20 @@ void mergeSortParallel(void* rank) {
         lastThread = min((firstThread + divisor - 1), (threadCount -1));
         midThread = ((lastThread + firstThread) / 2) + 1;
 
-        if(divisor > threadCount) {
-            thread_group = divisor - (divisor % threadCount);
-        }
-        else {
-            thread_group = divisor;
-        }
+        thread_group = lastThread - firstThread + 1;
 	
 	if(rem == threadCount) {
-	    rem = 0;
 	    if(threadCount % 2 == 0) {
 		midThread = difference;
 	    }
-	  //  else {
-	//	midThread = ;
-	  //  }
+	    else {
+		midThread = difference + 1;
+	    }
 	}
 	
 
         barrier();
-	if(myRank < threadCount - rem) {
+	if(thread_group > (divisor / 2)) {
 		mergeRec(firstIndices[firstThread], firstIndices[midThread] - 1, firstIndices[midThread], lastIndices[lastThread], \
 		        thread_group, firstIndices[firstThread], firstThread, lastThread, myRank);
 	
