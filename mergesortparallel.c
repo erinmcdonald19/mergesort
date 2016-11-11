@@ -84,8 +84,7 @@ void mergeSortParallel(void* rank) {
 	rem = threadCount % divisor;
         firstThread = (myRank - (myRank % divisor));
         lastThread = min((firstThread + divisor - 1), (threadCount -1));
-        midThread = ((lastThread + firstThread) / 2) + 1;
-
+        midThread = (firstThread + difference);
         thread_group = lastThread - firstThread + 1;
 	
 	if(rem == threadCount) {
